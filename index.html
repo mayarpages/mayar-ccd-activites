@@ -140,7 +140,7 @@ footer{text-align:center;color:#bbb;font-size:11px;margin-top:32px}
       </div>
       <div class="msg-box errnet" id="errnetBox">
         <h3>⚠️ Submission Failed</h3>
-        <p>Could not reach the server. Please check your connection and try again.</p>
+        <p id="errnetMsg">Could not reach the server. Please check your connection and try again.</p>
       </div>
     </div>
   </div>
@@ -148,14 +148,21 @@ footer{text-align:center;color:#bbb;font-size:11px;margin-top:32px}
 </div>
 
 <script>
-// ─── PASTE YOUR GOOGLE APPS SCRIPT URL BELOW ───────────────────────────────
-const SCRIPT_URL = https://script.google.com/macros/s/AKfycbxaS9Btt1lb_Y76lqsdz7AhNC9OclpZoMiiS9GCG2pgffzi0y5J89wD8GeOqYw0a6E/exec;
-// ───────────────────────────────────────────────────────────────────────────
+// --- PASTE YOUR GOOGLE APPS SCRIPT URL BELOW ---
+const SCRIPT_URL = "PASTE_YOUR_SCRIPT_URL_HERE";
+// -----------------------------------------------------------------------
+
+// We use GET-only requests to avoid all CORS issues.
+// Both the duplicate check AND the submission are done via GET parameters.
 
 document.getElementById('predForm').addEventListener('submit', async function(e) {
   e.preventDefault();
-  ['successBox','blockedBox','errnetBox'].forEach(function(x){ document.getElementById(x).classList.remove('show'); });
-  ['errId','errCountry'].forEach(function(x){ document.getElementById(x).classList.remove('show'); });
+  ['successBox','blockedBox','errnetBox'].forEach(function(x){
+    document.getElementById(x).classList.remove('show');
+  });
+  ['errId','errCountry'].forEach(function(x){
+    document.getElementById(x).classList.remove('show');
+  });
 
   const id      = document.getElementById('empId').value.trim();
   const country = document.getElementById('country').value;
@@ -169,10 +176,13 @@ document.getElementById('predForm').addEventListener('submit', async function(e)
   btn.classList.add('loading');
 
   try {
-    const res  = await fetch(SCRIPT_URL, {
-      method: 'POST',
-      body: JSON.stringify({ id: id, country: country }),
-    });
+    // Single GET request that checks duplicate AND writes the row if not duplicate
+    const url = SCRIPT_URL
+      + '?action=submit'
+      + '&id='      + encodeURIComponent(id)
+      + '&country=' + encodeURIComponent(country);
+
+    const res  = await fetch(url);
     const data = await res.json();
 
     if (data.status === 'ok') {
@@ -184,9 +194,13 @@ document.getElementById('predForm').addEventListener('submit', async function(e)
       document.getElementById('blockedId').textContent = id;
       document.getElementById('blockedBox').classList.add('show');
     } else {
+      document.getElementById('errnetMsg').textContent =
+        'Unexpected response: ' + JSON.stringify(data);
       document.getElementById('errnetBox').classList.add('show');
     }
   } catch(err) {
+    document.getElementById('errnetMsg').textContent =
+      'Error: ' + err.message;
     document.getElementById('errnetBox').classList.add('show');
   } finally {
     btn.disabled = false;
