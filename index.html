@@ -94,7 +94,7 @@ footer{text-align:center;color:#bbb;font-size:11px;margin-top:32px}
             <option value="DR Congo">🇨🇩&nbsp;&nbsp;DR Congo</option>
             <option value="Ecuador">🇪🇨&nbsp;&nbsp;Ecuador</option>
             <option value="Egypt">🇪🇬&nbsp;&nbsp;Egypt</option>
-            <option value="England">🏴󠁧󠁢󠁥󠁮󠁧󠁿&nbsp;&nbsp;England</option>
+            <option value="England">🏴&nbsp;&nbsp;England</option>
             <option value="France">🇫🇷&nbsp;&nbsp;France</option>
             <option value="Germany">🇩🇪&nbsp;&nbsp;Germany</option>
             <option value="Ghana">🇬🇭&nbsp;&nbsp;Ghana</option>
@@ -111,7 +111,7 @@ footer{text-align:center;color:#bbb;font-size:11px;margin-top:32px}
             <option value="Portugal">🇵🇹&nbsp;&nbsp;Portugal</option>
             <option value="Qatar">🇶🇦&nbsp;&nbsp;Qatar</option>
             <option value="Saudi Arabia">🇸🇦&nbsp;&nbsp;Saudi Arabia</option>
-            <option value="Scotland">🏴󠁧󠁢󠁳󠁣󠁴󠁿&nbsp;&nbsp;Scotland</option>
+            <option value="Scotland">🏴&nbsp;&nbsp;Scotland</option>
             <option value="Senegal">🇸🇳&nbsp;&nbsp;Senegal</option>
             <option value="South Africa">🇿🇦&nbsp;&nbsp;South Africa</option>
             <option value="South Korea">🇰🇷&nbsp;&nbsp;South Korea</option>
@@ -149,7 +149,10 @@ footer{text-align:center;color:#bbb;font-size:11px;margin-top:32px}
 
 <script>
 // --- PASTE YOUR GOOGLE APPS SCRIPT URL BELOW ---
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzKjuzugRoi8EGmbxLiDYpKwG6sd5yUZ2t4m4Gh5Rl1VrQVogenWCAtzgCKnAIVuEs/exec";
+const SCRIPT_URL = "PASTE_YOUR_SCRIPT_URL_HERE";
+
+// Valid Employee IDs (Head Office list)
+const VALID_EMPLOYEE_IDS = ["21000151", "21000165", "21000172", "21000191", "21000197", "21000201", "21000427", "21000450", "21000523", "21000665", "21000772", "21000886", "21000908", "21000932", "21000950", "21000964", "21000968", "21001016", "21001059", "21001148", "21001210", "21001211", "21001223", "21001224", "21001226", "21001230", "21001255", "21001262", "21001273", "21001284", "21001286", "21001288", "21001290", "21001291", "21001292", "21001300", "21001301", "21001302", "21001306", "21001314", "21001329", "21001363", "21001365", "21001375", "21001377", "21001380", "21001385", "21001408", "21001417", "21001423", "21001429", "21001436", "21001460", "21001461", "21001473", "21001487", "21001491", "21001525", "21001530", "21001532", "21001538", "21001543", "21001564", "21001573", "21001580", "21001588", "21001607", "21001631", "21001633"];
 // -----------------------------------------------------------------------
 
 // We use GET-only requests to avoid all CORS issues.
@@ -163,12 +166,18 @@ document.getElementById('predForm').addEventListener('submit', async function(e)
   ['errId','errCountry'].forEach(function(x){
     document.getElementById(x).classList.remove('show');
   });
+  document.getElementById('errId').textContent = 'Please enter your Employee ID.';
 
   const id      = document.getElementById('empId').value.trim();
   const country = document.getElementById('country').value;
   let ok = true;
   if (!id)      { document.getElementById('errId').classList.add('show');      ok = false; }
   if (!country) { document.getElementById('errCountry').classList.add('show'); ok = false; }
+  if (id && !VALID_EMPLOYEE_IDS.includes(id)) {
+    document.getElementById('errId').textContent = 'Employee ID not recognized. Please check and try again.';
+    document.getElementById('errId').classList.add('show');
+    ok = false;
+  }
   if (!ok) return;
 
   const btn = document.getElementById('submitBtn');
@@ -187,7 +196,7 @@ document.getElementById('predForm').addEventListener('submit', async function(e)
 
     if (data.status === 'ok') {
       document.getElementById('successMsg').textContent =
-        'Your prediction for ' + country + ' has been saved. Good luck! 🎉';
+        'Your prediction for ' + country + ' has been saved. Good luck! ';
       document.getElementById('successBox').classList.add('show');
       this.reset();
     } else if (data.status === 'duplicate') {
